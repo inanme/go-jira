@@ -23,8 +23,9 @@ import (
 type API struct {
 	Client *fasthttp.Client // Client is client for http requests
 
-	url  string // Jira URL
-	auth string // Auth data
+	url    string // Jira URL
+	auth   string // Auth data
+	config APIConfig
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -43,13 +44,12 @@ var (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // NewAPI create new API struct
-func NewAPI(url string, auth Auth) (*API, error) {
+func NewAPI(url string, auth Auth, config APIConfig) (*API, error) {
 	if url == "" {
 		return nil, ErrEmptyURL
 	}
 
 	err := auth.Validate()
-
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,6 @@ func (api *API) GetConfiguration() (*Configuration, error) {
 		"GET", "/rest/api/2/configuration",
 		EmptyParameters{}, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +115,6 @@ func (api *API) GetServerInfo(doHealthCheck bool) (*ServerInfo, error) {
 		"GET", url,
 		EmptyParameters{}, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +138,6 @@ func (api *API) GetColumns() ([]*Column, error) {
 		"GET", "/rest/api/2/settings/columns",
 		EmptyParameters{}, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +164,6 @@ func (api *API) GetDashboards(params DashboardParams) (*DashboardCollection, err
 		"GET", "/rest/api/2/dashboard",
 		params, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +186,6 @@ func (api *API) GetDashboard(dashboardID string) (*Dashboard, error) {
 		"GET", "/rest/api/2/dashboard/"+dashboardID,
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +210,6 @@ func (api *API) GetFields() ([]*Field, error) {
 		"GET", "/rest/api/2/field",
 		EmptyParameters{}, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -238,7 +232,6 @@ func (api *API) GetFilter(filterID string, params ExpandParameters) (*Filter, er
 		"GET", "/rest/api/2/filter/"+filterID,
 		params, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -265,7 +258,6 @@ func (api *API) GetFilterDefaultScope() (string, error) {
 		"GET", "/rest/api/2/filter/defaultShareScope",
 		EmptyParameters{}, result, nil, false,
 	)
-
 	if err != nil {
 		return "", err
 	}
@@ -290,7 +282,6 @@ func (api *API) GetFilterFavourites(params ExpandParameters) ([]*Filter, error) 
 		"GET", "/rest/api/2/filter/favourite",
 		params, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -313,7 +304,6 @@ func (api *API) GetIssue(issueIDOrKey string, params IssueParams) (*Issue, error
 		"GET", "/rest/api/2/issue/"+issueIDOrKey,
 		params, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -338,7 +328,6 @@ func (api *API) GetIssueComments(issueIDOrKey string, params ExpandParameters) (
 		"GET", "/rest/api/2/issue/"+issueIDOrKey+"/comment",
 		params, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -363,7 +352,6 @@ func (api *API) GetIssueComment(issueIDOrKey, commentID string, params ExpandPar
 		"GET", "/rest/api/2/issue/"+issueIDOrKey+"/comment/"+commentID,
 		params, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -380,15 +368,14 @@ func (api *API) GetIssueComment(issueIDOrKey, commentID string, params ExpandPar
 	}
 }
 
-// GetIssueMeta returns the meta data for editing an issue
+// GetEditIssueMeta returns the meta data for editing an issue
 // https://docs.atlassian.com/software/jira/docs/api/REST/6.4.13/#d2e4364
-func (api *API) GetIssueMeta(issueIDOrKey string) (*IssueMeta, error) {
+func (api *API) GetEditIssueMeta(issueIDOrKey string) (*IssueMeta, error) {
 	result := &IssueMeta{}
 	statusCode, err := api.doRequest(
 		"GET", "/rest/api/2/issue/"+issueIDOrKey+"/editmeta",
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -413,7 +400,6 @@ func (api *API) GetIssueRemoteLinks(issueIDOrKey string, params RemoteLinkParams
 		"GET", "/rest/api/2/issue/"+issueIDOrKey+"/remotelink",
 		params, &result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -440,7 +426,6 @@ func (api *API) GetIssueRemoteLink(issueIDOrKey, linkID string) (*RemoteLink, er
 		"GET", "/rest/api/2/issue/"+issueIDOrKey+"/remotelink/"+linkID,
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -473,7 +458,6 @@ func (api *API) GetIssueTransitions(issueIDOrKey string, params TransitionsParam
 		"GET", "/rest/api/2/issue/"+issueIDOrKey+"/transitions",
 		params, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -498,7 +482,6 @@ func (api *API) GetIssueVotes(issueIDOrKey string) (*VotesInfo, error) {
 		"GET", "/rest/api/2/issue/"+issueIDOrKey+"/votes",
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -523,7 +506,6 @@ func (api *API) GetIssueWatchers(issueIDOrKey string) (*WatchersInfo, error) {
 		"GET", "/rest/api/2/issue/"+issueIDOrKey+"/watchers",
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -548,7 +530,6 @@ func (api *API) GetIssueWorklogs(issueIDOrKey string) (*WorklogCollection, error
 		"GET", "/rest/api/2/issue/"+issueIDOrKey+"/worklog",
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -573,7 +554,6 @@ func (api *API) GetIssueWorklog(issueIDOrKey, worklogID string) (*Worklog, error
 		"GET", "/rest/api/2/issue/"+issueIDOrKey+"/worklog/"+worklogID,
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -590,27 +570,50 @@ func (api *API) GetIssueWorklog(issueIDOrKey, worklogID string) (*Worklog, error
 	}
 }
 
+// CreateIssue creates a new issue and returns it
+// https://docs.atlassian.com/software/jira/docs/api/REST/6.4.13/#d2e4164
+func (api *API) CreateIssue(issue *Issue) (*Issue, error) {
+	result := &Issue{}
+	statusCode, err := api.doRequest(
+		"POST", "/rest/api/2/issue",
+		EmptyParameters{}, result, issue, false,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	switch statusCode {
+	case 201:
+		return result, nil
+	case 400:
+		return nil, ErrInvalidInput
+	case 401:
+		return nil, ErrNoAuth
+	case 403:
+		return nil, ErrNoPerms
+	default:
+		return nil, makeUnknownError(statusCode)
+	}
+}
+
 // GetCreateMeta returns the meta data for creating issues. This includes
 // the available projects, issue types and fields, including field types
 // and whether or not those fields are required. Projects will not be returned
 // if the user does not have permission to create issues in that project.
 // https://docs.atlassian.com/software/jira/docs/api/REST/6.4.13/#d2e4330
-func (api *API) GetCreateMeta(params CreateMetaParams) ([]*Project, error) {
-	result := &struct {
-		Projects []*Project `json:"projects"`
-	}{}
+func (api *API) GetCreateMeta(projectIdOrKey string, issueTypeId string, params CreateMetaParams) (*CreateMetaIssueType, error) {
+	result := &CreateMetaIssueType{}
 	statusCode, err := api.doRequest(
-		"GET", "/rest/api/2/issue/createmeta",
+		"GET", "/rest/api/2/issue/createmeta/"+projectIdOrKey+"/issuetypes/"+issueTypeId,
 		params, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
 
 	switch statusCode {
 	case 200:
-		return result.Projects, nil
+		return result, nil
 	case 401:
 		return nil, ErrNoAuth
 	case 403:
@@ -632,7 +635,6 @@ func (api *API) IssuePicker(params IssuePickerParams) ([]*IssuePickerResults, er
 		"GET", "/rest/api/2/issue/picker",
 		params, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -686,7 +688,6 @@ func (api *API) GetIssueLink(linkID string) (*Link, error) {
 		"GET", "/rest/api/2/issueLink/"+linkID,
 		EmptyParameters{}, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -721,7 +722,6 @@ func (api *API) GetIssueLinkTypes() ([]*LinkType, error) {
 		"GET", "/rest/api/2/issueLinkType",
 		EmptyParameters{}, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -747,7 +747,6 @@ func (api *API) GetIssueLinkType(linkTypeID string) (*LinkType, error) {
 		"GET", "/rest/api/2/issueLinkType/"+linkTypeID,
 		EmptyParameters{}, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -772,7 +771,6 @@ func (api *API) GetIssueTypes() ([]*IssueType, error) {
 		"GET", "/rest/api/2/issuetype",
 		EmptyParameters{}, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -795,7 +793,6 @@ func (api *API) GetIssueType(issueTypeID string) (*IssueType, error) {
 		"GET", "/rest/api/2/issuetype/"+issueTypeID,
 		EmptyParameters{}, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -824,7 +821,6 @@ func (api *API) GetIssueTypeAlternatives(issueTypeID string) ([]*IssueType, erro
 		"GET", "/rest/api/2/issuetype/"+issueTypeID+"/alternatives",
 		EmptyParameters{}, &result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -849,7 +845,6 @@ func (api *API) GetAutocompleteData() (*AutocompleteData, error) {
 		"GET", "/rest/api/2/jql/autocompletedata",
 		EmptyParameters{}, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -878,7 +873,6 @@ func (api *API) GetAutocompleteSuggestions(params SuggestionParams) ([]Suggestio
 		"GET", "/rest/api/2/jql/autocompletedata/suggestions",
 		params, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -905,7 +899,6 @@ func (api *API) GetMyPermissions(params PermissionsParams) (map[string]*Permissi
 		"GET", "/rest/api/2/mypermissions",
 		params, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -932,7 +925,6 @@ func (api *API) GetMyself() (*User, error) {
 		"GET", "/rest/api/2/myself",
 		ExpandParameters{[]string{"groups"}}, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -959,7 +951,6 @@ func (api *API) GetPriorities() ([]*Priority, error) {
 		"GET", "/rest/api/2/priority",
 		EmptyParameters{}, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -982,7 +973,6 @@ func (api *API) GetPriority(priorityID string) (*Priority, error) {
 		"GET", "/rest/api/2/priority/"+priorityID,
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1009,7 +999,6 @@ func (api *API) GetProjects(params ExpandParameters) ([]*Project, error) {
 		"GET", "/rest/api/2/project",
 		params, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1034,7 +1023,6 @@ func (api *API) GetProject(projectIDOrKey string, params ExpandParameters) (*Pro
 		"GET", "/rest/api/2/project/"+projectIDOrKey,
 		params, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1060,7 +1048,6 @@ func (api *API) GetProjectAvatars(projectIDOrKey string) (*Avatars, error) {
 		"GET", "/rest/api/2/project/"+projectIDOrKey+"/avatars",
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1088,7 +1075,6 @@ func (api *API) GetProjectComponents(projectIDOrKey string) ([]*Component, error
 		"GET", "/rest/api/2/project/"+projectIDOrKey+"/components",
 		EmptyParameters{}, &result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1113,7 +1099,6 @@ func (api *API) GetProjectStatuses(projectIDOrKey string) ([]*IssueType, error) 
 		"GET", "/rest/api/2/project/"+projectIDOrKey+"/statuses",
 		EmptyParameters{}, &result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1138,7 +1123,6 @@ func (api *API) GetProjectVersions(projectIDOrKey string, params ExpandParameter
 		"GET", "/rest/api/2/project/"+projectIDOrKey+"/versions",
 		params, &result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1161,7 +1145,6 @@ func (api *API) GetProjectVersion(projectIDOrKey string, params VersionParams) (
 		"GET", "/rest/api/2/project/"+projectIDOrKey+"/version",
 		params, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1215,7 +1198,6 @@ func (api *API) GetProjectRoles(projectIDOrKey string) (map[string]string, error
 		"GET", "/rest/api/2/project/"+projectIDOrKey+"/role",
 		EmptyParameters{}, &result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1240,7 +1222,6 @@ func (api *API) GetProjectRole(projectIDOrKey, roleID string) (*Role, error) {
 		"GET", "/rest/api/2/project/"+projectIDOrKey+"/role/"+roleID,
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1265,7 +1246,6 @@ func (api *API) GetProjectCategories() ([]*ProjectCategory, error) {
 		"GET", "/rest/api/2/projectCategory",
 		EmptyParameters{}, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1290,7 +1270,6 @@ func (api *API) GetProjectCategory(categoryID string) (*ProjectCategory, error) 
 		"GET", "/rest/api/2/projectCategory/"+categoryID,
 		EmptyParameters{}, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1315,7 +1294,6 @@ func (api *API) ValidateProjectKey(projectKey string) error {
 		"GET", "/rest/api/2/projectvalidate/key?key="+projectKey,
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return err
 	}
@@ -1338,7 +1316,6 @@ func (api *API) GetResolutions() ([]*Resolution, error) {
 		"GET", "/rest/api/2/resolution",
 		EmptyParameters{}, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1361,7 +1338,6 @@ func (api *API) GetResolution(resolutionID string) (*Resolution, error) {
 		"GET", "/rest/api/2/resolution/"+resolutionID,
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1387,7 +1363,6 @@ func (api *API) GetRoles() ([]*Role, error) {
 		"GET", "/rest/api/2/role",
 		EmptyParameters{}, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1410,7 +1385,6 @@ func (api *API) GetRole(roleID string) (*Role, error) {
 		"GET", "/rest/api/2/role/"+roleID,
 		EmptyParameters{}, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1433,7 +1407,6 @@ func (api *API) GetStatuses() ([]*Status, error) {
 		"GET", "/rest/api/2/status",
 		EmptyParameters{}, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1458,7 +1431,6 @@ func (api *API) GetStatus(statusIDOrName string) (*Status, error) {
 		"GET", "/rest/api/2/status/"+statusIDOrName,
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1483,7 +1455,6 @@ func (api *API) GetStatusCategories() ([]*StatusCategory, error) {
 		"GET", "/rest/api/2/statuscategory",
 		EmptyParameters{}, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1509,7 +1480,6 @@ func (api *API) GetStatusCategory(caregoryIDOrName string) (*StatusCategory, err
 		"GET", "/rest/api/2/statuscategory/"+caregoryIDOrName,
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1539,7 +1509,6 @@ func (api *API) GetGroup(params GroupParams) (*Group, error) {
 		"GET", "/rest/api/2/group",
 		params, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1568,7 +1537,6 @@ func (api *API) GetUser(params UserParams) (*User, error) {
 		"GET", "/rest/api/2/user",
 		params, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1593,7 +1561,6 @@ func (api *API) GetUserAvatars(username string) (*Avatars, error) {
 		"GET", "/rest/api/2/user/avatars?username="+username,
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1621,7 +1588,6 @@ func (api *API) GetUserColumns(username string) ([]*Column, error) {
 		"GET", "/rest/api/2/user/columns?username="+username,
 		EmptyParameters{}, &result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1650,7 +1616,6 @@ func (api *API) GetUsersByPermissions(params UserPermissionParams) ([]*User, err
 		"GET", "/rest/api/2/user/permission/search",
 		params, &result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1677,7 +1642,6 @@ func (api *API) UserPicker(params UserPickerParams) (*UserPickerResults, error) 
 		"GET", "/rest/api/2/user/picker",
 		params, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1707,7 +1671,6 @@ func (api *API) GroupPicker(params GroupPickerParams) (*GroupPickerResults, erro
 		"GET", "/rest/api/2/groups/picker",
 		params, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1730,7 +1693,6 @@ func (api *API) GroupUserPicker(params GroupUserPickerParams) (*GroupUserPickerR
 		"GET", "/rest/api/2/groupuserpicker",
 		params, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1753,7 +1715,6 @@ func (api *API) Search(params SearchParams) (*SearchResults, error) {
 		"GET", "/rest/api/2/search",
 		params, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1778,7 +1739,6 @@ func (api *API) SearchUsers(params UserSearchParams) ([]*User, error) {
 		"GET", "/rest/api/2/user/search",
 		params, &result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1804,7 +1764,6 @@ func (api *API) GetSecurityLevel(levelID string) (*SecurityLevel, error) {
 		"GET", "/rest/api/2/securitylevel/"+levelID,
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1830,7 +1789,6 @@ func (api *API) GetScreenFields(screenID string) ([]*ScreenField, error) {
 		"GET", "/rest/api/2/screens/"+screenID+"/availableFields",
 		EmptyParameters{}, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1855,7 +1813,6 @@ func (api *API) GetScreenTabs(screenID string, params ScreenParams) ([]*ScreenTa
 		"GET", "/rest/api/2/screens/"+screenID+"/tabs",
 		params, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1880,7 +1837,6 @@ func (api *API) GetScreenTabFields(screenID, tabID string, params ScreenParams) 
 		"GET", "/rest/api/2/screens/"+screenID+"/tabs/"+tabID+"/fields",
 		params, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1905,7 +1861,6 @@ func (api *API) GetVersion(versionID string, params ExpandParameters) (*Version,
 		"GET", "/rest/api/2/version/"+versionID,
 		params, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -1934,7 +1889,6 @@ func (api *API) GetVersionRelatedCounts(versionID string) (int, int, error) {
 		"GET", "/rest/api/2/version/"+versionID+"/relatedIssueCounts",
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return 0, 0, err
 	}
@@ -1961,7 +1915,6 @@ func (api *API) GetVersionUnresolvedCount(versionID string) (int, error) {
 		"GET", "/rest/api/2/version/"+versionID+"/unresolvedIssueCount",
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return 0, err
 	}
@@ -1986,7 +1939,6 @@ func (api *API) GetWorkflows() ([]*Workflow, error) {
 		"GET", "/rest/api/2/workflow",
 		EmptyParameters{}, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -2009,7 +1961,6 @@ func (api *API) GetWorkflow(workflowName string) (*Workflow, error) {
 		"GET", "/rest/api/2/workflow?workflowName="+esc(workflowName),
 		EmptyParameters{}, result, nil, true,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -2038,7 +1989,6 @@ func (api *API) GetWorkflowScheme(schemeID string, returnDraftIfExists bool) (*W
 		"GET", url,
 		EmptyParameters{}, result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -2071,7 +2021,6 @@ func (api *API) GetWorkflowSchemeDefault(schemeID string, returnDraftIfExists bo
 		"GET", url,
 		EmptyParameters{}, result, nil, false,
 	)
-
 	if err != nil {
 		return "", err
 	}
@@ -2103,7 +2052,6 @@ func (api *API) GetWorkflowSchemeWorkflows(schemeID string, returnDraftIfExists 
 		"GET", url,
 		EmptyParameters{}, &result, nil, false,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -2129,7 +2077,6 @@ func (api *API) getEntityProperties(url string) ([]*Property, error) {
 	}{}
 
 	statusCode, err := api.doRequest("GET", url, EmptyParameters{}, result, nil, true)
-
 	if err != nil {
 		return nil, err
 	}
@@ -2153,7 +2100,6 @@ func (api *API) getEntityProperties(url string) ([]*Property, error) {
 // setEntityProperty create or update entity (issue/project) property
 func (api *API) setEntityProperty(url string, prop *Property) error {
 	statusCode, err := api.doRequest("PUT", url, EmptyParameters{}, nil, prop, false)
-
 	if err != nil {
 		return err
 	}
@@ -2181,7 +2127,6 @@ func (api *API) getEntityProperty(url, propKey string) (*Property, error) {
 	}{}
 
 	statusCode, err := api.doRequest("GET", url, EmptyParameters{}, result, nil, true)
-
 	if err != nil {
 		return nil, err
 	}
@@ -2205,7 +2150,6 @@ func (api *API) getEntityProperty(url, propKey string) (*Property, error) {
 // deleteEntityProperty deletes entity (issue/project) property
 func (api *API) deleteEntityProperty(url, propKey string) error {
 	statusCode, err := api.doRequest("DELETE", url, EmptyParameters{}, nil, nil, false)
-
 	if err != nil {
 		return err
 	}
@@ -2240,7 +2184,6 @@ func (api *API) doRequest(method, uri string, params Parameters, result, body in
 
 	if body != nil {
 		bodyData, err := json.Marshal(body)
-
 		if err != nil {
 			return -1, err
 		}
@@ -2249,12 +2192,20 @@ func (api *API) doRequest(method, uri string, params Parameters, result, body in
 	}
 
 	err := api.Client.Do(req, resp)
-
 	if err != nil {
 		return -1, err
 	}
 
 	statusCode := resp.StatusCode()
+
+	if api.config.Debug {
+		bodyString := string(resp.Body())
+		if bodyString == "" {
+			fmt.Printf("[%s-%s] %s\n", method, uri, "<empty>")
+		} else {
+			fmt.Printf("[%s-%s] %s\n", method, uri, bodyString)
+		}
+	}
 
 	if statusCode != 200 && decodeError {
 		return statusCode, decodeInternalError(resp.Body())
@@ -2302,7 +2253,6 @@ func (api *API) acquireRequest(method, uri string, params Parameters) *fasthttp.
 func decodeInternalError(data []byte) error {
 	ec := &ErrorCollection{}
 	err := json.Unmarshal(data, ec)
-
 	if err != nil {
 		return nil
 	}

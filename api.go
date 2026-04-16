@@ -201,6 +201,27 @@ type DashboardCollection struct {
 	Data       []*Dashboard `json:"dashboards"`
 }
 
+type SchemaType struct {
+	Type string `json:"type"`
+}
+
+type FieldCreateMetadata struct {
+	FieldId    string      `json:"fieldId"`
+	Key        string      `json:"key"`
+	Name       string      `json:"name"`
+	Operations []string    `json:"operations"`
+	Required   bool        `json:"required"`
+	Schema     *SchemaType `json:"schema"`
+}
+
+// CreateMetaIssueType
+type CreateMetaIssueType struct {
+	StartAt    int                    `json:"startAt"`
+	MaxResults int                    `json:"maxResults"`
+	Total      int                    `json:"total"`
+	Data       []*FieldCreateMetadata `json:"values"`
+}
+
 // Dashboard contains info about dashboard
 type Dashboard struct {
 	ID   string `json:"id"`
@@ -218,53 +239,53 @@ type IssueParams struct {
 
 // Issue is basic issue struct
 type Issue struct {
-	ID     string       `json:"id"`
-	Key    string       `json:"key"`
-	Fields *IssueFields `json:"fields"`
+	ID     string       `json:"id,omitempty"`
+	Key    string       `json:"key,omitempty"`
+	Fields *IssueFields `json:"fields,omitempty"`
 }
 
 // IssueFields contains all available issue fields
 type IssueFields struct {
-	TimeSpent                     int                `json:"timespent"`
-	TimeEstimate                  int                `json:"timeestimate"`
-	TimeOriginalEstimate          int                `json:"timeoriginalestimate"`
-	AggregateTimeSpent            int                `json:"aggregatetimespent"`
-	AggregateTimeEstimate         int                `json:"aggregatetimeestimate"`
-	AggregateTimeOriginalEstimate int                `json:"aggregatetimeoriginalestimate"`
-	WorkRatio                     int                `json:"workratio"`
-	Summary                       string             `json:"summary"`
-	Description                   string             `json:"description"`
-	Environment                   string             `json:"environment"`
-	Created                       *Date              `json:"created"`
-	DueDate                       *Date              `json:"duedate"`
-	LastViewed                    *Date              `json:"lastViewed"`
-	ResolutionDate                *Date              `json:"resolutiondate"`
-	Updated                       *Date              `json:"updated"`
-	Creator                       *User              `json:"creator"`
-	Reporter                      *User              `json:"reporter"`
-	Assignee                      *User              `json:"assignee"`
-	AggregateProgress             *Progress          `json:"aggregateprogress"`
-	Progress                      *Progress          `json:"progress"`
-	IssueType                     *IssueType         `json:"issuetype"`
-	Parent                        *Issue             `json:"parent"`
-	Project                       *Project           `json:"project"`
-	Resolution                    *Resolution        `json:"resolution"`
-	TimeTracking                  *TimeTracking      `json:"timetracking"`
-	Watches                       *Watches           `json:"watches"`
-	Priority                      *Priority          `json:"priority"`
-	Comments                      *CommentCollection `json:"comment"`
-	Worklogs                      *WorklogCollection `json:"worklog"`
-	Votes                         *VotesInfo         `json:"votes"`
-	Status                        *Status            `json:"status"`
-	Security                      *SecurityLevel     `json:"security"`
-	Labels                        []string           `json:"labels"`
-	Components                    []*Component       `json:"components"`
-	Attachments                   []*Attachment      `json:"attachment"`
-	SubTasks                      []*Issue           `json:"subtasks"`
-	Versions                      []*Version         `json:"versions"`
-	FixVersions                   []*Version         `json:"fixVersions"`
-	Issuelinks                    []*Link            `json:"issuelinks"`
+	AggregateProgress             *Progress          `json:"aggregateprogress,omitempty"`
+	AggregateTimeEstimate         int                `json:"aggregatetimeestimate,omitempty"`
+	AggregateTimeOriginalEstimate int                `json:"aggregatetimeoriginalestimate,omitempty"`
+	AggregateTimeSpent            int                `json:"aggregatetimespent,omitempty"`
+	Assignee                      *User              `json:"assignee,omitempty"`
+	Attachments                   []*Attachment      `json:"attachment,omitempty"`
+	Comments                      *CommentCollection `json:"comment,omitempty"`
+	Components                    []*Component       `json:"components,omitempty"`
+	Created                       *Date              `json:"created,omitempty"`
+	Creator                       *User              `json:"creator,omitempty"`
 	Custom                        CustomFieldsStore  `json:"-"`
+	Description                   string             `json:"description,omitempty"`
+	DueDate                       *Date              `json:"duedate,omitempty"`
+	Environment                   string             `json:"environment,omitempty"`
+	FixVersions                   []*Version         `json:"fixVersions,omitempty"`
+	IssueType                     *IssueType         `json:"issuetype,omitempty"`
+	Issuelinks                    []*Link            `json:"issuelinks,omitempty"`
+	Labels                        []string           `json:"labels,omitempty"`
+	LastViewed                    *Date              `json:"lastViewed,omitempty"`
+	Parent                        *Issue             `json:"parent,omitempty"`
+	Priority                      *Priority          `json:"priority,omitempty"`
+	Progress                      *Progress          `json:"progress,omitempty"`
+	Project                       *Project           `json:"project,omitempty"`
+	Reporter                      *User              `json:"reporter,omitempty"`
+	Resolution                    *Resolution        `json:"resolution,omitempty"`
+	ResolutionDate                *Date              `json:"resolutiondate,omitempty"`
+	Security                      *SecurityLevel     `json:"security,omitempty"`
+	Status                        *Status            `json:"status,omitempty"`
+	SubTasks                      []*Issue           `json:"subtasks,omitempty"`
+	Summary                       string             `json:"summary,omitempty"`
+	TimeEstimate                  int                `json:"timeestimate,omitempty"`
+	TimeOriginalEstimate          int                `json:"timeoriginalestimate,omitempty"`
+	TimeSpent                     int                `json:"timespent,omitempty"`
+	TimeTracking                  *TimeTracking      `json:"timetracking,omitempty"`
+	Updated                       *Date              `json:"updated,omitempty"`
+	Versions                      []*Version         `json:"versions,omitempty"`
+	Votes                         *VotesInfo         `json:"votes,omitempty"`
+	Watches                       *Watches           `json:"watches,omitempty"`
+	WorkRatio                     int                `json:"workratio,omitempty"`
+	Worklogs                      *WorklogCollection `json:"worklog,omitempty"`
 }
 
 // CustomFieldsStore is store for custom fields data
@@ -272,22 +293,22 @@ type CustomFieldsStore map[string]json.RawMessage
 
 // IssueType contains info about issue type
 type IssueType struct {
-	Statuses    []*Status `json:"statuses"`
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	IconURL     string    `json:"iconUrl"`
-	AvatarID    int       `json:"avatarId"`
-	IsSubTask   bool      `json:"subtask"`
+	Statuses    []*Status `json:"statuses,omitempty"`
+	ID          string    `json:"id,omitempty"`
+	Name        string    `json:"name,omitempty"`
+	Description string    `json:"description,omitempty"`
+	IconURL     string    `json:"iconUrl,omitempty"`
+	AvatarID    int       `json:"avatarId,omitempty"`
+	IsSubTask   bool      `json:"subtask,omitempty"`
 }
 
 // Priority contains priority info
 type Priority struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	IconURL     string `json:"iconUrl"`
-	Description string `json:"description"`
-	StatusColor string `json:"statusColor"`
+	ID          string `json:"id,omitempty"`
+	Name        string `json:"name,omitempty"`
+	IconURL     string `json:"iconUrl,omitempty"`
+	Description string `json:"description,omitempty"`
+	StatusColor string `json:"statusColor,omitempty"`
 }
 
 // Resolution contains resolution info
@@ -314,16 +335,16 @@ type TimeTracking struct {
 
 // Component contains info about component
 type Component struct {
-	ID                  string `json:"id"`
-	Name                string `json:"name"`
-	Description         string `json:"description"`
-	AssigneeType        string `json:"assigneeType"`
-	RealAssigneeType    string `json:"realAssigneeType"`
-	Project             string `json:"project"`
-	Assignee            *User  `json:"assignee"`
-	RealAssignee        *User  `json:"realAssignee"`
-	ProjectID           int    `json:"projectId"`
-	IsAssigneeTypeValid bool   `json:"isAssigneeTypeValid"`
+	ID                  string `json:"id,omitempty"`
+	Name                string `json:"name,omitempty"`
+	Description         string `json:"description,omitempty"`
+	AssigneeType        string `json:"assigneeType,omitempty"`
+	RealAssigneeType    string `json:"realAssigneeType,omitempty"`
+	Project             string `json:"project,omitempty"`
+	Assignee            *User  `json:"assignee,omitempty"`
+	RealAssignee        *User  `json:"realAssignee,omitempty"`
+	ProjectID           int    `json:"projectId,omitempty"`
+	IsAssigneeTypeValid bool   `json:"isAssigneeTypeValid,omitempty"`
 }
 
 // Progress contains info about issue progress
@@ -570,27 +591,25 @@ type Permission struct {
 
 // CreateMetaParams params for fetching metadata for creating issues
 type CreateMetaParams struct {
-	ProjectIDs     []string `query:"projectIds"`
-	ProjectKeys    []string `query:"projectKeys"`
-	IssueTypeIDs   []string `query:"issuetypeIds"`
-	IssueTypeNames []string `query:"issuetypeNames"`
+	StartAt    int `query:"startAt"`
+	MaxResults int `query:"maxResults"`
 }
 
 // Project contains info about project
 type Project struct {
-	ID           string            `json:"id"`
-	Name         string            `json:"name"`
-	Key          string            `json:"key"`
-	URL          string            `json:"url"`
-	AssigneeType string            `json:"assigneeType"`
-	Lead         *User             `json:"lead"`
-	Category     *ProjectCategory  `json:"projectCategory"`
-	AvatarURL    *AvatarURL        `json:"avatarUrls"`
-	ProjectKeys  []string          `json:"projectKeys"`
-	IssueTypes   []*IssueType      `json:"issueTypes"`
-	Versions     []*Version        `json:"versions"`
-	Components   []*Component      `json:"components"`
-	Roles        map[string]string `json:"roles"`
+	ID           string            `json:"id,omitempty"`
+	Name         string            `json:"name,omitempty"`
+	Key          string            `json:"key,omitempty"`
+	URL          string            `json:"url,omitempty"`
+	AssigneeType string            `json:"assigneeType,omitempty"`
+	Lead         *User             `json:"lead,omitempty"`
+	Category     *ProjectCategory  `json:"projectCategory,omitempty"`
+	AvatarURL    *AvatarURL        `json:"avatarUrls,omitempty"`
+	ProjectKeys  []string          `json:"projectKeys,omitempty"`
+	IssueTypes   []*IssueType      `json:"issueTypes,omitempty"`
+	Versions     []*Version        `json:"versions,omitempty"`
+	Components   []*Component      `json:"components,omitempty"`
+	Roles        map[string]string `json:"roles,omitempty"`
 }
 
 // ProjectCategory contains info about project category
@@ -721,15 +740,15 @@ type UserCollection struct {
 
 // User contains user info
 type User struct {
-	AvatarURL   *AvatarURL  `json:"avatarUrls"`
-	Name        string      `json:"name"`
-	Key         string      `json:"key"`
-	Email       string      `json:"emailAddress"`
-	DisplayName string      `json:"displayName"`
-	TimeZone    string      `json:"timeZone"`
-	Locale      string      `json:"locale"`
-	Groups      *UserGroups `json:"groups"`
-	IsActive    bool        `json:"active"`
+	AvatarURL   *AvatarURL  `json:"avatarUrls,omitempty"`
+	Name        string      `json:"name,omitempty"`
+	Key         string      `json:"key,omitempty"`
+	Email       string      `json:"emailAddress,omitempty"`
+	DisplayName string      `json:"displayName,omitempty"`
+	TimeZone    string      `json:"timeZone,omitempty"`
+	Locale      string      `json:"locale,omitempty"`
+	Groups      *UserGroups `json:"groups,omitempty"`
+	IsActive    bool        `json:"active,omitempty"`
 }
 
 // UserGroups contains info about user groups
@@ -982,6 +1001,32 @@ func (d *Date) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// MarshalJSON is a custom IssueFields marshaler that merges known fields with custom fields
+func (f *IssueFields) MarshalJSON() ([]byte, error) {
+	// Create an alias to avoid infinite recursion
+	type Alias IssueFields
+	base, err := json.Marshal((*Alias)(f))
+	if err != nil {
+		return nil, err
+	}
+
+	if len(f.Custom) == 0 {
+		return base, nil
+	}
+
+	// Merge custom fields into the base JSON object
+	var baseMap map[string]json.RawMessage
+	if err := json.Unmarshal(base, &baseMap); err != nil {
+		return nil, err
+	}
+
+	for k, v := range f.Custom {
+		baseMap[k] = v
+	}
+
+	return json.Marshal(baseMap)
+}
+
 // UnmarshalJSON is a custom IssueFields unmarshaler
 func (f *IssueFields) UnmarshalJSON(b []byte) error {
 	f.Custom = map[string]json.RawMessage{}
@@ -995,7 +1040,6 @@ func (f *IssueFields) UnmarshalJSON(b []byte) error {
 	}
 
 	err := json.Unmarshal(b, &f.Custom)
-
 	if err != nil {
 		return err
 	}
@@ -1003,7 +1047,6 @@ func (f *IssueFields) UnmarshalJSON(b []byte) error {
 	for key, chunk := range f.Custom {
 		if field, found := knownFields[key]; found {
 			err = json.Unmarshal(chunk, field.Addr().Interface())
-
 			if err != nil {
 				return err
 			}

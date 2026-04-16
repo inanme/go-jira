@@ -20,6 +20,10 @@ type Auth interface {
 	Encode() string
 }
 
+type APIConfig struct {
+	Debug bool
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // AuthBasic is struct with data for basic authorization
