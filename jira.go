@@ -2277,6 +2277,26 @@ func getUserAgent(app, version string) string {
 	)
 }
 
+func (api *API) GetBoardSprints(boardID string, params BoardSprintParams) (*SprintCollection, error) {
+	result := &SprintCollection{}
+	statusCode, err := api.doRequest(
+		"GET", "/rest/agile/1.0/board/"+boardID+"/sprint",
+		params, result, nil, true,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	switch statusCode {
+	case 200:
+		return result, nil
+	case 401:
+		return nil, ErrNoAuth
+	default:
+		return nil, makeUnknownError(statusCode)
+	}
+}
+
 // makeUnknownError create error struct for unknown error
 func makeUnknownError(statusCode int) error {
 	return fmt.Errorf("Unknown error occurred (status code %d)", statusCode)

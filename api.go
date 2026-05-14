@@ -1201,3 +1201,24 @@ func (p UserPermissionParams) ToQuery() string {
 func (p UserSearchParams) ToQuery() string {
 	return paramsToQuery(p)
 }
+
+type Sprint struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	State string `json:"state"`
+}
+
+type SprintCollection struct {
+	MaxResults int       `json:"maxResults"`
+	StartAt    int       `json:"startAt"`
+	IsLast     bool      `json:"isLast"`
+	Values     []*Sprint `json:"values"`
+}
+
+type BoardSprintParams struct {
+	State string `query:"state"`
+}
+
+func (p BoardSprintParams) ToQuery() string {
+	return paramsToQuery(p)
+}
