@@ -741,6 +741,7 @@ type UserCollection struct {
 // User contains user info
 type User struct {
 	AvatarURL   *AvatarURL  `json:"avatarUrls,omitempty"`
+	AccountID   string      `json:"accountId,omitempty"`
 	Name        string      `json:"name,omitempty"`
 	Key         string      `json:"key,omitempty"`
 	Email       string      `json:"emailAddress,omitempty"`
