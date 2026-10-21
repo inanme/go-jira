@@ -1731,6 +1731,59 @@ func (api *API) Search(params SearchParams) (*SearchResults, error) {
 	}
 }
 
+// SearchJQL searches for issues using JQL on the cursor-paged endpoint that
+// Atlassian Cloud uses in place of the removed /search
+// https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issue-search/#api-rest-api-2-search-jql-get
+func (api *API) SearchJQL(params SearchJQLParams) (*SearchJQLResults, error) {
+	result := &SearchJQLResults{}
+	statusCode, err := api.doRequest(
+		"GET", "/rest/api/2/search/jql",
+		params, result, nil, true,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	switch statusCode {
+	case 200:
+		return result, nil
+	case 400:
+		return result, ErrInvalidInput
+	case 401:
+		return result, ErrNoAuth
+	default:
+		return nil, makeUnknownError(statusCode)
+	}
+}
+
+// UpdateIssueFields sets the given fields on an issue, leaving the rest alone.
+// Jira answers 204 with no body on success.
+// https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/#api-rest-api-2-issue-issueidorkey-put
+func (api *API) UpdateIssueFields(issueIDOrKey string, fields map[string]json.RawMessage) error {
+	statusCode, err := api.doRequest(
+		"PUT", "/rest/api/2/issue/"+issueIDOrKey,
+		EmptyParameters{}, nil, map[string]any{"fields": fields}, false,
+	)
+	if err != nil {
+		return err
+	}
+
+	switch statusCode {
+	case 200, 204:
+		return nil
+	case 400:
+		return ErrInvalidInput
+	case 401:
+		return ErrNoAuth
+	case 403:
+		return ErrNoPerms
+	case 404:
+		return ErrNoContent
+	default:
+		return makeUnknownError(statusCode)
+	}
+}
+
 // SearchUsers returns a list of users that match the search string
 // https://docs.atlassian.com/software/jira/docs/api/REST/6.4.13/#d2e1990
 func (api *API) SearchUsers(params UserSearchParams) ([]*User, error) {

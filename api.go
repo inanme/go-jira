@@ -631,6 +631,23 @@ type SearchParams struct {
 	DisableQueryValidation bool     `query:"validateQuery,reverse"`
 }
 
+// SearchJQLParams are the parameters for the cursor-paged /search/jql endpoint,
+// which replaced /search on Atlassian Cloud. It returns only issue ids unless
+// Fields names what else to include.
+type SearchJQLParams struct {
+	JQL           string   `query:"jql"`
+	Fields        []string `query:"fields"`
+	MaxResults    int      `query:"maxResults"`
+	NextPageToken string   `query:"nextPageToken"`
+}
+
+// SearchJQLResults is one page of a /search/jql result
+type SearchJQLResults struct {
+	Issues        []*Issue `json:"issues"`
+	NextPageToken string   `json:"nextPageToken"`
+	IsLast        bool     `json:"isLast"`
+}
+
 // SearchResults contains search result
 type SearchResults struct {
 	StartAt    int      `json:"startAt"`
@@ -1160,6 +1177,11 @@ func (p GroupUserPickerParams) ToQuery() string {
 
 // ToQuery converts params to URL query
 func (p ScreenParams) ToQuery() string {
+	return paramsToQuery(p)
+}
+
+// ToQuery converts params to URL query
+func (p SearchJQLParams) ToQuery() string {
 	return paramsToQuery(p)
 }
 
